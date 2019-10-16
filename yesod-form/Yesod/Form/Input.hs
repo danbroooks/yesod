@@ -1,5 +1,6 @@
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleContexts #-}
+
 -- | Provides for getting input from either GET or POST params without
 -- generating HTML forms. For more information, see:
 -- <http://www.yesodweb.com/book/forms#forms_kinds_of_forms>.
@@ -51,7 +52,7 @@ ireq field name = FormInput $ \m l env fenv -> do
           filteredFEnv = fromMaybe [] $ Map.lookup name fenv
       emx <- fieldParse field filteredEnv filteredFEnv
       return $ case emx of
-          Left (SomeMessage e) -> Left $ (:) $ renderMessage m l e
+          Left (SomeMessage e) -> Left $ (:) (name <> ": " <> renderMessage m l e)
           Right Nothing -> Left $ (:) $ renderMessage m l $ MsgInputNotFound name
           Right (Just a) -> Right a
 
@@ -63,8 +64,8 @@ iopt field name = FormInput $ \m l env fenv -> do
           filteredFEnv = fromMaybe [] $ Map.lookup name fenv
       emx <- fieldParse field filteredEnv filteredFEnv
       return $ case emx of
-        Left (SomeMessage e) -> Left $ (:) $ renderMessage m l e
-        Right x -> Right x
+          Left (SomeMessage e) -> Left $ (:) (name <> ": " <> renderMessage m l e)
+          Right x -> Right x
 
 -- | Run a @FormInput@ on the GET parameters (i.e., query string). If parsing
 -- fails, calls 'invalidArgs'.
